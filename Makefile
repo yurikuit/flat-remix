@@ -12,20 +12,16 @@ generate_folder_variants:
 	find color-folder -type d -name 'places-*' ! -name 'places-blue' \
 	| while read folder_variant; do \
 		color_variant=$$(echo $$folder_variant | sed -E 's/.*-([a-z])([a-z]+)$$/\U\1\L\2/g'); \
-		for variant in Dark Light; do \
-			new_theme="Flat-Remix-$${color_variant}-$${variant}"; \
-			rm -rf $$new_theme; \
-			cp -a "Flat-Remix-Blue-$${variant}" $$new_theme; \
-			rm -rf "$${new_theme}/places/scalable/"; \
-			cp -a $$folder_variant "$${new_theme}/places/scalable/"; \
-			sed -i "s/Name=.*/Name=$${new_theme}/" "$${new_theme}/index.theme"; \
-		done; \
+		new_theme="Flat-Remix-$${color_variant}-Dark"; \
+		rm -rf $$new_theme; \
+		cp -a "Flat-Remix-Blue-Dark" $$new_theme; \
+		rm -rf "$${new_theme}/places/scalable/"; \
+		cp -a $$folder_variant "$${new_theme}/places/scalable/"; \
+		sed -i "s/Name=.*/Name=$${new_theme}/" "$${new_theme}/index.theme"; \
 	done
 
 generate_theme_variants:
 	find . -name "Flat-Remix-*-Dark" ! -name Flat-Remix-Black-Dark -exec sh -c 'rm -rf $$1/apps/scalable/; cp -a Flat-Remix-Black-Dark/apps/scalable/ $$1/apps/scalable/' _ {} \;
-	find . -name "Flat-Remix-*-Light" ! -name Flat-Remix-Black-Light -exec sh -c 'rm -rf $$1/panel/; cp -a Flat-Remix-Black-Light/panel/ $$1/panel/' _ {} \;
-	find . -name "Flat-Remix-*-Light" ! -name Flat-Remix-Black-Light -exec sh -c 'rm -rf $$1/actions/[12]*; cp -a Flat-Remix-Black-Light/actions/[12]* $$1/actions/' _ {} \;
 
 install:
 	mkdir -p $(DESTDIR)$(PREFIX)/share/icons
@@ -49,15 +45,14 @@ _get_tag:
 	@echo $(TAG)
 
 dist: _get_version
-	variants="Light Dark"; \
 	count=1; \
 	for variant in $(COLOR_VARIANTS); \
 	do \
-			count_pretty=$$(echo "0$${count}" | tail -c 3); \
-			tar -c "Flat-Remix-$${variant}"* | \
-				xz -z - > "$${count_pretty}-Flat-Remix-$${variant}_$(VERSION).tar.xz"; \
-			count=$$((count+1)); \
-	done; \
+		count_pretty=$$(echo "0$${count}" | tail -c 3); \
+		tar -c "Flat-Remix-$${variant}-Dark" | \
+			xz -z - > "$${count_pretty}-Flat-Remix-$${variant}-Dark_$(VERSION).tar.xz"; \
+		count=$$((count+1)); \
+	done;
 
 release: _get_version
 	$(MAKE) generate_changelog VERSION=$(VERSION)
